@@ -206,11 +206,20 @@ class UserView(Resource):
     Maps the ``/users/<username>`` endpoint
     """
     @auth.login_required
-    def get(self, username):
-        with database_session() as session:
-            user = User.from_session(username, session)
-            if user != g.user:
-                abort(401)
+    @database_session()
+    def get(self, session, username_or_id):
+        try:
+            username_or_id = int(username_or_id)
+        except ValueError:
+            username_or_id = str(username_or_id)
 
-            response = jsonify(user.get_full)
-            return response
+        if isinstance(username_or_id, int):
+            user = session.query(User).filter_by(
+                    id=username_or_id).first()
+        else:
+            user = session.query(User).filter_by(
+                username=username_or_id
+            ).first()
+
+        response = jsonify(user.get_full)
+        return response

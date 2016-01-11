@@ -20,7 +20,7 @@ app = Flask(__name__)
 api = Api(app, prefix='/api/v1')
 
 api.add_resource(UserContainer, '/users')
-api.add_resource(UserView, '/users/<username>')
+api.add_resource(UserView, '/users/<username_or_id>')
 api.add_resource(ProjectContainer, '/projects')
 
 database_session = ContextManagedSession(bind=conf.DATABASE_ENGINE)

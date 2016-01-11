@@ -186,8 +186,12 @@ class TestUserView(TestView):
         self.password = 'tiger'
         self.email = 'scott@tiger.com'
         self.user = User(self.username, self.password, self.email)
+        self.user.verify_password = mock.MagicMock(return_value=True)
 
 
+@mock.patch('sqlalchemy.orm.Query.all')
+@mock.patch('sqlalchemy.orm.Query.count')
+@mock.patch('sqlalchemy.orm.Query.first')
 class TestGet(TestUserView):
 
     def setUp(self):
@@ -200,12 +204,11 @@ class TestGet(TestUserView):
 
         self.bad_user = User('foo', 'bar', 'foo@bar.com')
 
-    @mock.patch('sqlalchemy.orm.Query.first')
-    @mock.patch('views.users.auth.login_required')
     @mock.patch('views.users.g')
-    def test_get_correct(self, mock_g, mock_auth, mock_first):
-        mock_auth.return_value = lambda f: f
+    def test_get_correct(self, mock_g, mock_first, mock_count, mock_all):
         mock_first.return_value = self.user
+        mock_all.return_value = []
+        mock_count.return_value = 0
 
         mock_g.user = self.user
 
@@ -214,16 +217,17 @@ class TestGet(TestUserView):
 
         self.assertTrue(mock_first.called)
 
-    @mock.patch('sqlalchemy.orm.Query.first')
-    @mock.patch('views.users.auth.login_required')
     @mock.patch('views.users.g')
-    def test_get_fake_user(self, mock_g, mock_auth, mock_first):
-        mock_auth.return_value = lambda f: f
+    def test_get_by_user_id(self, mock_g, mock_first, mock_count, mock_all):
+        self.user.id = 1
         mock_first.return_value = self.user
+        mock_all.return_value = []
+        mock_count.return_value = 0
+        mock_g.user = self.user
 
-        mock_g.user = self.bad_user
+        url = 'api/v1/users/1'
 
-        r = self.request_method(self.url, headers=self.headers)
-        self.assertEqual(r.status_code, 401)
+        r = self.request_method(url, headers=self.headers)
+        self.assertEqual(r.status_code, 200)
 
         self.assertTrue(mock_first.called)
