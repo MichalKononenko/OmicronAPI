@@ -1,6 +1,16 @@
 #! /usr/bin/env python
 """
-Script to run the server
+Usage:
+    __main__.py -h | --help
+    __main__.py HOST PORT [--debug]
+
+Arguments:
+    HOST  Host IP Address that server will run on (Use DEFAULT for default)
+    PORT  Port Number that server will run on (Use DEFAULT for default)
+
+Options:
+    -h --help  Show this
+    --debug  Activate debug mode
 """
 import logging
 from omicron_server.api_server import app
@@ -8,6 +18,7 @@ from omicron_server.config import default_config as conf
 from omicron_server.database.models.users import Administrator
 from omicron_server.database.sessions import ContextManagedSession
 from omicron_server.database.schema import metadata
+from docopt import docopt
 
 __author__ = 'Michal Kononenko'
 
@@ -50,7 +61,23 @@ def create_root_user(session):
         session.add(user)
 
 if __name__ == "__main__":
+    arguments = docopt(__doc__)
     metadata.create_all(bind=conf.DATABASE_ENGINE)
     create_root_user()
 
-    app.run(host=conf.IP_ADDRESS, port=conf.PORT, debug=conf.DEBUG)
+    if arguments['HOST'] == 'DEFAULT':
+        host = conf.IP_ADDRESS
+    else:
+        host = arguments['HOST']
+
+    if arguments['PORT'] == 'DEFAULT':
+        port = conf.PORT
+    else:
+        port = arguments['PORT']
+
+    if arguments['--debug']:
+        debug = True
+    else:
+        debug = False
+
+    app.run(host=host, port=port, debug=debug)

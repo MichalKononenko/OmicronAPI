@@ -5,6 +5,7 @@ import unittest
 import mock
 import logging
 from omicron_server.config import Config
+import subprocess
 
 from omicron_server import __main__
 from omicron_server.database import Administrator
@@ -20,6 +21,7 @@ class TestSetLogFile(unittest.TestCase):
     Tests that if a logfile path is provided, that the master
     application log will log data to the filename given
     """
+
     def setUp(self):
         self.logfile_name = 'logfile'
 
@@ -47,13 +49,13 @@ class TestRunServer(unittest.TestCase):
     """
     Contains unit tests for the script
     """
+
     def setUp(self):
         self.command_to_run = 'python ../../__main__.py'
         self.user = Administrator('root', 'root', 'scott@deler.com')
 
 
 class TestCreateRootUser(TestRunServer):
-
     @mock.patch('sqlalchemy.orm.Query.first')
     @mock.patch('sqlalchemy.orm.Session.add')
     def test_create_root_user_found(self, mock_add, mock_first):
@@ -71,3 +73,17 @@ class TestCreateRootUser(TestRunServer):
 
         self.assertTrue(mock_first.called)
         self.assertTrue(mock_add.called)
+
+
+class TestCLIBase(unittest.TestCase):
+    def setUp(self):
+        self.command_to_run = [
+            'python',
+            '%s/__main__.py' % Config.BASE_DIRECTORY,
+            'DEFAULT'
+            'DEFAULT'
+        ]
+
+    def test_CLI_base(self):
+        completed_command = subprocess.Popen(self.command_to_run, stdout=subprocess.PIPE)
+        self.assertEqual(completed_command.returncode, None)
