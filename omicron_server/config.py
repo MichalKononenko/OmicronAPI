@@ -73,7 +73,8 @@ class Config(object):
                 )
             if key == 'PORT':
                 value = int(value)
-
+            if key == "DATABASE_URL":
+                self.DATABASE_ENGINE = create_engine(value)
             self.__dict__[key] = value
 
 default_config = Config()
