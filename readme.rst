@@ -1,3 +1,6 @@
+.. image:: https://badge.waffle.io/MichalKononenko/OmicronServer.png?label=ready&title=Ready 
+ :target: https://waffle.io/MichalKononenko/OmicronServer
+ :alt: 'Stories in Ready'
 Welcome to OmicronServer
 ========================
 
